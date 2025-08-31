@@ -3,6 +3,7 @@ package blogposts_test
 import (
 	"errors"
 	"io/fs"
+	"reflect"
 	"testing"
 	"testing/fstest"
 
@@ -14,7 +15,8 @@ func TestPostsFromFs(t *testing.T) {
 
 		fs := fstest.MapFS{
 			"hello-world.md": {Data: []byte(`Title: Hello, TDD world!
-Description: lol`)},
+Description: lol
+Tags: tag,lol`)},
 		}
 		posts, err := blogposts.PostsFromFs(fs)
 
@@ -29,11 +31,10 @@ Description: lol`)},
 		expectedBlogpost := blogposts.Post{
 			Title:       "Hello, TDD world!",
 			Description: "lol",
+			Tags:        []string{"tag", "lol"},
 		}
 
-		if posts[0] != expectedBlogpost {
-			t.Errorf("got %s, want %s", posts[0], expectedBlogpost)
-		}
+		assertResponse(t, posts[0], expectedBlogpost)
 	})
 
 	t.Run("failing fs", func(t *testing.T) {
@@ -43,6 +44,14 @@ Description: lol`)},
 			t.Errorf("expected an error did get one")
 		}
 	})
+}
+
+func assertResponse(t *testing.T, got, want blogposts.Post) {
+	t.Helper()
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %s, want %s", got, want)
+	}
 }
 
 type FailingFs struct{}
