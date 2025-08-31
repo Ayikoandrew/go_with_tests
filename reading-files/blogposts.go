@@ -10,6 +10,7 @@ import (
 type Post struct {
 	Title       string
 	Description string
+	Tags        []string
 }
 
 func PostsFromFs(fileSystem fs.FS) ([]Post, error) {
@@ -33,11 +34,18 @@ func makePostFromFile(fileSystem fs.FS, f fs.DirEntry) Post {
 func newPost(blogfile io.Reader) Post {
 	// fileContent, _ := io.ReadAll(blogfile)
 	// title := strings.TrimPrefix(string(fileContent), "Title: ")
-
 	scanner := bufio.NewScanner(blogfile)
-	scanner.Scan()
-	title := strings.TrimPrefix(scanner.Text(), "Title: ")
-	scanner.Scan()
-	description := strings.TrimPrefix(scanner.Text(), "Description: ")
-	return Post{title, description}
+	readLine := func(prefix string) string {
+		scanner.Scan()
+		return strings.TrimPrefix(scanner.Text(), prefix)
+	}
+
+	title := readLine("Title: ")
+	description := readLine("Description: ")
+	tags := strings.Split(readLine("Tags: "), ",")
+	return Post{
+		Title:       title,
+		Description: description,
+		Tags:        tags,
+	}
 }
