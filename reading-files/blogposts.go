@@ -1,13 +1,15 @@
 package blogposts
 
 import (
+	"bufio"
 	"io"
 	"io/fs"
 	"strings"
 )
 
 type Post struct {
-	Title string
+	Title       string
+	Description string
 }
 
 func PostsFromFs(fileSystem fs.FS) ([]Post, error) {
@@ -29,8 +31,13 @@ func makePostFromFile(fileSystem fs.FS, f fs.DirEntry) Post {
 }
 
 func newPost(blogfile io.Reader) Post {
-	fileContent, _ := io.ReadAll(blogfile)
-	title := strings.TrimPrefix(string(fileContent), "Title: ")
+	// fileContent, _ := io.ReadAll(blogfile)
+	// title := strings.TrimPrefix(string(fileContent), "Title: ")
 
-	return Post{title}
+	scanner := bufio.NewScanner(blogfile)
+	scanner.Scan()
+	title := strings.TrimPrefix(scanner.Text(), "Title: ")
+	scanner.Scan()
+	description := strings.TrimPrefix(scanner.Text(), "Description: ")
+	return Post{title, description}
 }
