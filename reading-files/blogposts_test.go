@@ -9,12 +9,12 @@ import (
 	blogposts "github.com/Ayikoandrew/gwt/reading-files"
 )
 
-func TestBlogposts(t *testing.T) {
+func TestPostsFromFs(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 
 		fs := fstest.MapFS{
-			"hello-world.md": {Data: []byte("Title: Hello, TDD world")},
-			//"hello-twitch.md": {Data: []byte("Title: Hello, twitchy world")},
+			"hello-world.md": {Data: []byte(`Title: Hello, TDD world!
+Description: lol`)},
 		}
 		posts, err := blogposts.PostsFromFs(fs)
 
@@ -26,7 +26,10 @@ func TestBlogposts(t *testing.T) {
 			t.Errorf("expected %d posts but got %d posts", len(posts), len(fs))
 		}
 
-		expectedBlogpost := blogposts.Post{Title: "Hello, TDD world"}
+		expectedBlogpost := blogposts.Post{
+			Title:       "Hello, TDD world!",
+			Description: "lol",
+		}
 
 		if posts[0] != expectedBlogpost {
 			t.Errorf("got %s, want %s", posts[0], expectedBlogpost)
